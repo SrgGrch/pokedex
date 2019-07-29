@@ -1,8 +1,8 @@
 package com.srggrch.testapp.model
 
 /**
- * @param pokemonAbilities String
- * @param pokemonAbilities PokemonAbility -> Ability
+ * @param name String
+ * @param abilities PokemonAbility -> NamedAPIResource -> Ability
  * @param base_experience Int
  * @param forms NamedAPIResource -> PokemonForm
  * @param height Int
@@ -19,10 +19,9 @@ package com.srggrch.testapp.model
  */
 data class Pokemon(
     val name: String,
-    val pokemonAbilities: ArrayList<PokemonAbility>,
+    val abilities: ArrayList<PokemonAbility>,
     val base_experience: Int,
     val forms: ArrayList<NamedAPIResource>,
-    //val game_indices: ArrayList<>
     val height: Int,
     val is_default: Boolean,
     val order: Int,

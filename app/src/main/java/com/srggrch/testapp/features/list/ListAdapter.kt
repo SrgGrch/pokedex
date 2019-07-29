@@ -8,7 +8,6 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
-import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import com.srggrch.testapp.R
 import com.srggrch.testapp.core.NamedResHelper
@@ -59,7 +58,7 @@ class ListAdapter(private val itemClickListener: ItemClickListener) :
         @Inject
         lateinit var retrofit: Retrofit
 
-        lateinit var api: ResourceApi<Pokemon>
+        lateinit var api: ResourceApi
 
         private val name: TextView = itemView.findViewById(R.id.itemName)
         private val progress: ProgressBar = itemView.findViewById(R.id.itemProgressBar)
@@ -75,7 +74,7 @@ class ListAdapter(private val itemClickListener: ItemClickListener) :
 
             name.text = text
             GlobalScope.launch(Dispatchers.Main) {
-                pokemon = NamedResHelper<Pokemon>().getResource(pokemonRes)
+                pokemon = NamedResHelper().getPokemon(pokemonRes)
                 Picasso
                     .get()
                     .load(pokemon.sprites.front_default)
