@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.TextUtils
@@ -16,9 +15,10 @@ import com.google.gson.Gson
 import com.squareup.picasso.Picasso
 import com.srggrch.testapp.R
 import com.srggrch.testapp.core.moxy.MvpAndroidxActivity
-import com.srggrch.testapp.model.NamedAPIResource
 import com.srggrch.testapp.model.Pokemon
+import com.srggrch.testapp.model.PokemonStat
 import kotlinx.android.synthetic.main.activity_pokemon.*
+import kotlinx.android.synthetic.main.activity_pokemon.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -31,6 +31,10 @@ class PokemonActivity : MvpAndroidxActivity(), PokemonView {
     lateinit var pokemon: Pokemon
 
     var abilitiesCount = 0
+
+    var totalStat = 0
+
+    var statCounter = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,13 +87,44 @@ class PokemonActivity : MvpAndroidxActivity(), PokemonView {
         }
     }
 
-    override fun hideAbilityProgress(ammount: Int){
+    override fun hideAbilityProgress(amount: Int){
         abilitiesCount++
-        if (abilitiesCount == ammount){
+        if (abilitiesCount == amount){
             abilitiesBar.visibility = View.GONE
             abilitiesLayout.visibility = View.VISIBLE
         }
     }
+
+    override fun setStat(pokemonStat: PokemonStat) {
+        totalStat += pokemonStat.base_stat
+        val concat: (String, Int) -> String = {x, y -> "$x $y" }
+        when (pokemonStat.stat.name){
+            "speed" -> statSpeed.text = concat(statSpeed.text.toString(), pokemonStat.base_stat)
+            "special-defense" -> statSpecialDefense.text = concat(statSpecialDefense.text.toString(), pokemonStat.base_stat)
+            "special-attack" -> statSpecialAttack.text = concat(statSpecialAttack.text.toString(), pokemonStat.base_stat)
+            "defense" -> statDefense.text = concat(statDefense.text.toString(), pokemonStat.base_stat)
+            "attack" -> statAttack.text = concat(statAttack.text.toString(), pokemonStat.base_stat)
+            "hp" -> statHP.text = concat(statHP.text.toString(), pokemonStat.base_stat)
+        }
+        statTotal.text = concat(resources.getString(R.string.stat_total), totalStat)
+        statCounter++
+        if (statCounter == 6) {
+            statBar.visibility = View.GONE
+            statLayout.visibility = View.VISIBLE
+        }
+    }
+
+    override fun setType(name: String, isFirst: Boolean) {
+        val concat: (String, String, String) -> String = {x, y, z -> "$x$y $z" }
+        types.text = if (isFirst) concat(types.text.toString(), "", name) else concat(types.text.toString(), ",", name)
+    }
+
+    override fun setWeightAndHeight(weight: Float, height: Float) {
+        val concat: (String, Float) -> String = {x, y -> "$x $y" }
+        this.weight.text = concat(this.weight.text.toString(), (weight / 10))
+        this.height.text = concat(this.height.text.toString(), (height / 10))
+    }
+
 
     companion object {
         fun start(pokemon: Pokemon, context: Context) {

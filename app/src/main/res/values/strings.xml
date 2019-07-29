@@ -1,4 +1,15 @@
 <resources>
     <string name="app_name">Pokédex</string>
     <string name="SHARED_PREFS">com.srggrch.testapp</string>
+    <string name="stat_hp">HP: </string>
+    <string name="stat_attack">Attack: </string>
+    <string name="stat_defense">Defense: </string>
+    <string name="stat_special_attack">Special Attack: </string>
+    <string name="stat_special_defense">Special Defense: </string>
+    <string name="stat_speed">Speed: </string>
+    <string name="stat_total">Total: </string>
+    <string name="header_hidden_abilities">Hidden abilities:</string>
+    <string name="header_abilities">Abilities:</string>
+    <string name="header_stats">Stats:</string>
+    <string name="pokemon_types">Types:</string>
 </resources>
