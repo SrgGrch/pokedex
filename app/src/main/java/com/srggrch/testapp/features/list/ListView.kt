@@ -10,4 +10,6 @@ interface ListView : MvpView {
     fun addTripList(list: ArrayList<NamedAPIResource>)
 
     fun refreshTripList(list: ArrayList<NamedAPIResource>)
+
+    fun showTopPokemon(find: NamedAPIResource)
 }

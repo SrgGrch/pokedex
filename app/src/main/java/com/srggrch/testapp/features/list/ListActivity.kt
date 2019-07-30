@@ -1,6 +1,9 @@
 package com.srggrch.testapp.features.list
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.arellomobile.mvp.presenter.InjectPresenter
@@ -14,8 +17,12 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.util.*
+import kotlin.collections.ArrayList
+
 
 class ListActivity : MvpAndroidxActivity(), ListView {
+
 
     @InjectPresenter
     lateinit var presenter: ListPresenter
@@ -23,6 +30,12 @@ class ListActivity : MvpAndroidxActivity(), ListView {
     private lateinit var recyclerView: RecyclerView
     private lateinit var layoutManager: LinearLayoutManager
     private lateinit var adapter: ListAdapter
+
+    private var attack = false
+    private var hp = false
+    private var defence = false
+
+    private var isFABOpen = false
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,8 +75,55 @@ class ListActivity : MvpAndroidxActivity(), ListView {
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = adapter
 
+        shuffleFab.setOnClickListener {
+            GlobalScope.launch(Dispatchers.Main) {
+                progressView.visibility = View.VISIBLE
+                presenter.shuffleList()
+            }
+
+        }
+
         GlobalScope.launch(Dispatchers.Main) {
             presenter.loadNewItems()
+        }
+
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val inflater = menuInflater
+        inflater.inflate(R.menu.list_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId){
+            R.id.itemAttack -> {
+                item.isChecked = !item.isChecked
+                attack = item.isChecked
+                sortList()
+                true
+            }
+            R.id.itemDefence ->{
+                item.isChecked = !item.isChecked
+                defence = item.isChecked
+                sortList()
+                true
+            }
+            R.id.itemHP -> {
+                item.isChecked = !item.isChecked
+                hp = item.isChecked
+                sortList()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun sortList() {
+        progressView.visibility = View.VISIBLE
+        recyclerView.isFocusable = false
+        GlobalScope.launch(Dispatchers.Main) {
+            presenter.sortList(adapter.items,attack, defence, hp)
         }
 
     }
@@ -71,6 +131,8 @@ class ListActivity : MvpAndroidxActivity(), ListView {
     override fun refreshTripList(list: ArrayList<NamedAPIResource>) {
         adapter.refreshItems(list)
         mainRefresh.isRefreshing = false
+        layoutManager.scrollToPositionWithOffset(0, 0)
+        progressView.visibility = View.VISIBLE
     }
 
     override fun addTripList(list: ArrayList<NamedAPIResource>) {
@@ -80,6 +142,15 @@ class ListActivity : MvpAndroidxActivity(), ListView {
 
     override fun onListReady(list: List<Pokemon>) {
 //        adapter.setItems(list)
+    }
+
+    override fun showTopPokemon(pokemon: NamedAPIResource) {
+        val position = adapter.items.indexOf(pokemon)
+        Collections.swap(adapter.items, position, 0)
+        adapter.notifyItemMoved(position, 0)
+        layoutManager.scrollToPositionWithOffset(0, 0)
+        recyclerView.isFocusable = true
+        progressView.visibility = View.GONE
     }
 
 }

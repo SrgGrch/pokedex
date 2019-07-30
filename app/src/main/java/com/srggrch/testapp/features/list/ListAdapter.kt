@@ -23,7 +23,7 @@ import javax.inject.Inject
 class ListAdapter(private val itemClickListener: ItemClickListener) :
     RecyclerView.Adapter<ListAdapter.ListHolder>() {
 
-    private val items = ArrayList<NamedAPIResource>()
+    val items = ArrayList<NamedAPIResource>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.list_item, parent, false)
