@@ -39,7 +39,7 @@ class ListPresenter : MvpPresenter<ListView>() {
 
     suspend fun loadNewItems() {
         val result = api.getPokemonList(page)
-        viewState.addTripList(result.results)
+        viewState.addItems(result.results)
         page += 30
     }
 

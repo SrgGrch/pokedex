@@ -35,6 +35,8 @@ class ListActivity : MvpAndroidxActivity(), ListView {
     private var hp = false
     private var defence = false
 
+    var isLoading = false
+
     private var isFABOpen = false
 
 
@@ -55,6 +57,7 @@ class ListActivity : MvpAndroidxActivity(), ListView {
 
         recyclerView.addOnScrollListener(object : PaginationScrollListener(layoutManager) {
             override fun loadMoreItems() {
+                isLoading = true
                 GlobalScope.launch(Dispatchers.Main) {
                     presenter.loadNewItems()
                 }
@@ -62,7 +65,7 @@ class ListActivity : MvpAndroidxActivity(), ListView {
 
             override fun isLastPage(): Boolean = false
 
-            override fun isLoading(): Boolean = false
+            override fun isLoading(): Boolean = isLoading
 
         })
 
@@ -77,7 +80,6 @@ class ListActivity : MvpAndroidxActivity(), ListView {
 
         shuffleFab.setOnClickListener {
             GlobalScope.launch(Dispatchers.Main) {
-                progressView.visibility = View.VISIBLE
                 presenter.shuffleList()
             }
 
@@ -132,17 +134,14 @@ class ListActivity : MvpAndroidxActivity(), ListView {
         adapter.refreshItems(list)
         mainRefresh.isRefreshing = false
         layoutManager.scrollToPositionWithOffset(0, 0)
-        progressView.visibility = View.VISIBLE
     }
 
-    override fun addTripList(list: ArrayList<NamedAPIResource>) {
+    override fun addItems(list: ArrayList<NamedAPIResource>) {
         adapter.setItems(list)
+        isLoading = false
 //        adapter.notifyDataSetChanged()
     }
 
-    override fun onListReady(list: List<Pokemon>) {
-//        adapter.setItems(list)
-    }
 
     override fun showTopPokemon(pokemon: NamedAPIResource) {
         val position = adapter.items.indexOf(pokemon)

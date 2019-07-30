@@ -5,9 +5,8 @@ import com.srggrch.testapp.model.NamedAPIResource
 import com.srggrch.testapp.model.Pokemon
 
 interface ListView : MvpView {
-    fun onListReady(list: List<Pokemon>)
 
-    fun addTripList(list: ArrayList<NamedAPIResource>)
+    fun addItems(list: ArrayList<NamedAPIResource>)
 
     fun refreshTripList(list: ArrayList<NamedAPIResource>)
 
