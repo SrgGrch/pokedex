@@ -4,14 +4,15 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.arellomobile.mvp.presenter.InjectPresenter
 import com.srggrch.testapp.R
 import com.srggrch.testapp.core.PaginationScrollListener
+import com.srggrch.testapp.core.PokemonDiffUtillCallback
 import com.srggrch.testapp.core.moxy.MvpAndroidxActivity
 import com.srggrch.testapp.features.pokemon.PokemonActivity
-import com.srggrch.testapp.model.NamedAPIResource
 import com.srggrch.testapp.model.Pokemon
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +23,6 @@ import kotlin.collections.ArrayList
 
 
 class ListActivity : MvpAndroidxActivity(), ListView {
-
 
     @InjectPresenter
     lateinit var presenter: ListPresenter
@@ -130,20 +130,32 @@ class ListActivity : MvpAndroidxActivity(), ListView {
 
     }
 
-    override fun refreshTripList(list: ArrayList<NamedAPIResource>) {
+    override fun refreshTripList(list: ArrayList<Pokemon>) {
         adapter.refreshItems(list)
         mainRefresh.isRefreshing = false
+        progressView.visibility = View.GONE
         layoutManager.scrollToPositionWithOffset(0, 0)
     }
 
-    override fun addItems(list: ArrayList<NamedAPIResource>) {
-        adapter.setItems(list)
+    override fun addItems(list: ArrayList<Pokemon>) {
+        adapter.setData(list)
         isLoading = false
 //        adapter.notifyDataSetChanged()
     }
 
+    override fun showSortedList(sortedList: ArrayList<Pokemon>) {
+        val callback = PokemonDiffUtillCallback(adapter.items, sortedList)
+        val result = DiffUtil.calculateDiff(callback)
+        adapter.setSortedData(sortedList)
 
-    override fun showTopPokemon(pokemon: NamedAPIResource) {
+        result.dispatchUpdatesTo(adapter)
+
+        layoutManager.scrollToPositionWithOffset(0, 0)
+        progressView.visibility = View.GONE
+    }
+
+    @Deprecated("old method, use fun showSortedList(...) instead")
+    override fun showTopPokemon(pokemon: Pokemon) {
         val position = adapter.items.indexOf(pokemon)
         Collections.swap(adapter.items, position, 0)
         adapter.notifyItemMoved(position, 0)

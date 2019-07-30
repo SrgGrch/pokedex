@@ -8,6 +8,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
+import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import com.srggrch.testapp.R
 import com.srggrch.testapp.core.NamedResHelper
@@ -18,12 +19,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
+import java.lang.Exception
 import javax.inject.Inject
 
 class ListAdapter(private val itemClickListener: ItemClickListener) :
     RecyclerView.Adapter<ListAdapter.ListHolder>() {
 
-    val items = ArrayList<NamedAPIResource>()
+    var items = ArrayList<Pokemon>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.list_item, parent, false)
@@ -36,14 +38,24 @@ class ListAdapter(private val itemClickListener: ItemClickListener) :
         holder.bind(items[position])
     }
 
-    fun setItems(list: ArrayList<NamedAPIResource>) {
+    fun setData(list: ArrayList<Pokemon>) {
         if (list.isNotEmpty()) {
             items.addAll(list)
             notifyDataSetChanged()
         }
     }
 
-    fun refreshItems(list: ArrayList<NamedAPIResource>) {
+    fun setSortedData(list: ArrayList<Pokemon>) {
+        if (list.isNotEmpty()) {
+//            items.clear()
+//            items.addAll(list)
+//            notifyDataSetChanged()
+            items = list
+            notifyDataSetChanged()
+        }
+    }
+
+    fun refreshItems(list: ArrayList<Pokemon>) {
         if (list.isNotEmpty()) {
             items.clear()
             items.addAll(list)
@@ -66,23 +78,26 @@ class ListAdapter(private val itemClickListener: ItemClickListener) :
         private val photo: ImageView = itemView.findViewById(R.id.itemPhoto)
 
 
-        internal fun bind(pokemonRes: NamedAPIResource) {
+        internal fun bind(pokemon: Pokemon) {
 
-            lateinit var pokemon: Pokemon
-
-            val text = pokemonRes.name.substring(0, 1).toUpperCase() + pokemonRes.name.substring(1)
+            val text = pokemon.name.substring(0, 1).toUpperCase() + pokemon.name.substring(1)
 
             name.text = text
-            GlobalScope.launch(Dispatchers.Main) {
-                pokemon = NamedResHelper().getPokemon(pokemonRes)
-                Picasso
-                    .get()
-                    .load(pokemon.sprites.front_default)
-                    .resize(200, 200)
-                    .into(photo)
-                photo.visibility = View.VISIBLE
-                progress.visibility = View.GONE
-            }
+            Picasso
+                .get()
+                .load(pokemon.sprites.front_default)
+                .resize(200, 200)
+                .into(photo, object : Callback {
+                    override fun onSuccess() {
+                        photo.visibility = View.VISIBLE
+                        progress.visibility = View.GONE
+                    }
+
+                    override fun onError(e: Exception?) {}
+
+                })
+
+
             cardView.setOnClickListener { itemClickListener.onItemClickListener(pokemon) }
         }
     }

@@ -33,41 +33,51 @@ class ListPresenter : MvpPresenter<ListView>() {
 
 
     suspend fun refresh() {
-        val result = api.getPokemonList()
-        viewState.refreshTripList(result.results)
+        val result = api.getPokemonList().results
+        viewState.refreshTripList(convertList(result))
     }
 
     suspend fun loadNewItems() {
-        val result = api.getPokemonList(page)
-        viewState.addItems(result.results)
+        val result = api.getPokemonList(page).results
+
         page += 30
+        viewState.addItems(convertList(result))
     }
 
     suspend fun shuffleList() {
         val count = api.getPokemonList(0, 1).count
         page = Random.nextInt(0, count - 30)
-        val result = api.getPokemonList(page)
-        viewState.refreshTripList(result.results)
+        val result = api.getPokemonList(page).results
+        viewState.refreshTripList(convertList(result))
+    }
+
+    suspend fun convertList(list: ArrayList<NamedAPIResource>): ArrayList<Pokemon> {
+        val resList = ArrayList<Pokemon>()
+
+        val listTask = list.map {
+            GlobalScope.async {
+                NamedResHelper().getPokemon(it)
+            }
+        }
+
+        listTask.forEach { resList.add(it.await()) }
+
+        return resList
     }
 
 
-    suspend fun sortList(list: ArrayList<NamedAPIResource>, attack: Boolean, defense: Boolean, hp: Boolean) {
+    suspend fun sortList(list: ArrayList<Pokemon>, attack: Boolean, defense: Boolean, hp: Boolean) {
         if (attack || defense || hp) {
-            val pList = ArrayList<Pokemon>()
 
-            val res = list.map{
-                GlobalScope.async {
-                    NamedResHelper().getPokemon(it)
-                }
-            }
-
-            res.forEach{ pList.add(it.await()) }
-
-            val max = pList.maxWith(
+            list.sortWith(
                 getComparator(attack, defense, hp)
-            )!!
+            )
 
-            viewState.showTopPokemon(list.find { it.name == max.name }!!)
+            list.reverse()
+
+            viewState.showSortedList(list)
+        } else {
+            refresh()
         }
     }
 
